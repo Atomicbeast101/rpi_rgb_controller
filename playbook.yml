@@ -1,0 +1,55 @@
+---
+- name: RGB Controller API Server Installer
+  hosts: all
+  vars:
+    python3_packages:
+    - configparser
+    - pigpio
+    - flask
+  tasks:
+    - name: Install python3 packages
+      pip:
+        name: "{{ python3_packages }}"
+        executable: pip3
+    
+    - name: Create /opt/rgb_controller directory
+      file:
+        path: /opt/rgb_controller
+        state: directory
+        owner: root
+        group: root
+        mode: 0775
+    
+    - name: Copy app.py file to /opt/rgb_controller
+      copy:
+        src: files/app.py
+        dest: /opt/rgb_controller/app.py
+        owner: root
+        group: root
+        mode: 0644
+    
+    - name: Copy config.ini to /opt/rgb_controller
+      copy:
+        src: "files/{{ inventory_hostname }}_config.ini"
+        dest: /opt/rgb_controller/config.ini
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy rgb_controller.service file to /etc/systemd/system/
+      copy:
+        src: files/rgb_controller.service
+        dest: /etc/systemd/system/rgb_controller.service
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Reload systemd service
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart rgb_controller service
+      systemd:
+        name: rgb_controller
+        state: restarted
+        enabled: yes
