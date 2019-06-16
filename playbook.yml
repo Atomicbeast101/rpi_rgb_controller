@@ -7,6 +7,11 @@
     - pigpio
     - flask
   tasks:
+    - name: Update apt packages
+      apt:
+        name: "*"
+        state: latest
+
     - name: Install python3 packages
       pip:
         name: "{{ python3_packages }}"
